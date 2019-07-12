@@ -11,6 +11,6 @@ public interface ItemService {
     Item getItem(String search, String id);
     Item editItem(String search, String id, Item item);
     void deleteItem(String search, String id);
-    Collection<Item> getItemsPriceRange(String search, float maxPrice, float minPrice);
+    Collection<Item> getItemsPriceRange(String search, int maxPrice, int minPrice);
     Collection<Item> getItemsTag(String search, String tag);
 }

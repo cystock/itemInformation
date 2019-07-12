@@ -46,7 +46,7 @@ public class ItemServiceFileImp implements ItemService {
     }
 
     @Override
-    public Collection<Item> getItemsPriceRange(String search, float maxPrice, float minPrice) {
+    public Collection<Item> getItemsPriceRange(String search, int maxPrice, int minPrice) {
         return null;
     }
 

@@ -1,7 +1,7 @@
+import org.eclipse.jetty.server.RequestLog;
+
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ItemServiceMapImp implements ItemService{
@@ -26,13 +26,13 @@ public class ItemServiceMapImp implements ItemService{
     @Override
     public LinkedList<String> getItemsTitle(String search) {
         LinkedList<String> list = new LinkedList<>();
-        if (itemHashMap.containsKey(search)) {
-            Collection<Item> col = itemHashMap.get(search);
+        try {
+            Collection<Item> col = getCollection(search);
             for (Item i : col) {
                 list.add(i.getTitle());
             }
-        } else {
-            System.err.println("Invalid query parameter.");
+        } catch (ItemException e) {
+            System.out.println("Invalid collection. Exception:  " + e);
         }
         return list;
     }
@@ -100,36 +100,62 @@ public class ItemServiceMapImp implements ItemService{
 
     @Override
     public void deleteItem(String search, String id) {
-        if (itemHashMap.containsKey(search)) {
-            Collection<Item> col = itemHashMap.get(search);
+        try {
+            Collection<Item> col = getCollection(search);
             for (Item i: col) {
                 if (i.getId().equals(id)){
                     col.remove(i);
                 }
             }
             itemHashMap.put(search, col);
-        } else
-            System.err.println("Invalid query parameter.");
+        }  catch (ItemException e) {
+            System.out.println("Invalid collection. Exception:  " + e);
+        }
     }
 
     @Override
-    public Collection<Item> getItemsPriceRange(String search, float maxPrice, float minPrice) {
-        return null;
+    public Collection<Item> getItemsPriceRange(String search, int maxPrice, int minPrice) {
+        Collection<Item> colFinal = new ArrayList<>();
+        try{
+            Collection<Item> col = getCollection(search);
+            for ( Item i: col){
+                if ( i.getPrice() <= maxPrice && i.getPrice() >= minPrice)
+                    colFinal.add(i);
+            }
+
+        } catch (ItemException e) {
+            System.out.println("Invalid collection. Exception:  " + e);
+        }
+        return colFinal;
     }
 
     @Override
     public Collection<Item> getItemsTag(String search, String tag) {
-        Collection<Item> colFinal = null;
-        if (itemHashMap.containsKey(search)) {
-            Collection<Item> col = itemHashMap.get(search);
+        Collection<Item> colFinal = new ArrayList<>();
+
+        try {
+            Collection<Item> col = getCollection(search);
             for (Item i: col) {
                 if (i.getTags().contains(tag))
                     colFinal.add(i);
             }
-            itemHashMap.put(search, col);
-        } else{
-            System.err.println("Invalid query parameter.");
+        } catch (ItemException e) {
+            System.out.println("Invalid collection. Exception:  " + e);
         }
         return colFinal;
     }
+
+    private Collection<Item> getCollection(String search) throws ItemException {
+        Collection<Item> col = null;
+        if (itemHashMap.containsKey(search)) {
+            col = itemHashMap.get(search);
+            if (col == null)
+                throw new ItemException("Empty collection");
+        } else
+            throw new ItemException("Empty collection");
+
+        return col;
+    }
+
+
 }

@@ -52,7 +52,7 @@ public class SparkItemExample {
             res.type("application/json");
             Item item = new Gson().fromJson(req.body(), Item.class);
             itemService.addItem(req.queryParams("search"), item); //TODO: Error
-            return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS));
+            return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS, "Item already created"));
         });
 
         // Editar un item
@@ -82,18 +82,31 @@ public class SparkItemExample {
             return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS, "Item deleted"));
         });
 
-        get("/items/titles", (req, res) -> {
+        // by title
+        get("/title", (req, res) -> {
             res.type("application/json");
             List<String> list = itemService.getItemsTitle(req.queryParams("search"));
-            if (list != null){
+            if (list.size() != 0){
                 return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS, new Gson().toJsonTree(list)));
             } else
                 return new Gson().toJson(new StandarResponse(StatusResponse.ERROR, "Can not create items list by title"));
         });
 
-        get("/items", (req, res) -> {
+        get("/tags", (req, res) -> {
+            res.type("application/json");
             Collection<Item> col = itemService.getItemsTag(req.queryParams("search"), req.queryParams("tag"));
-            if (col != null){
+            if (col.size() != 0){
+                return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS, new Gson().toJsonTree(col)));
+            } else
+                return new Gson().toJson(new StandarResponse(StatusResponse.ERROR, "Can not create items collection by tags"));
+        });
+
+        get("/pricerange", (req, res) -> {
+            res.type("application/json");
+            int maxprice = (Integer.parseInt(req.queryParams("maxprice")));
+            int minprice = (Integer.parseInt(req.queryParams("minprice")));
+            Collection<Item> col = itemService.getItemsPriceRange(req.queryParams("search"), maxprice, minprice);
+            if (col.size() != 0){
                 return new Gson().toJson(new StandarResponse(StatusResponse.SUCCESS, new Gson().toJsonTree(col)));
             } else
                 return new Gson().toJson(new StandarResponse(StatusResponse.ERROR, "Can not create items collection by tags"));

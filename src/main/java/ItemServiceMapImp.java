@@ -3,6 +3,7 @@ import org.eclipse.jetty.server.RequestLog;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class ItemServiceMapImp implements ItemService{
 
@@ -57,13 +58,15 @@ public class ItemServiceMapImp implements ItemService{
     @Override
     public Collection<Item> getItems(String search) {
         Collection<Item> col = null;
+        Collection<Item> colFinal = null;
         if (!itemHashMap.containsKey(search)){
             System.err.println("Invalid query parameter or search do no exits.");
             throw new NullPointerException("Empty Items collection. First generate a serch");
         }
         else
             col = itemHashMap.get(search);
-        return col;
+            colFinal = col.stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        return colFinal;
     }
 
     @Override

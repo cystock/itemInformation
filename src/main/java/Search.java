@@ -19,6 +19,8 @@ public class Search {
     private final String searchUrl = "https://api.mercadolibre.com/sites/MLA/search?q=";
 
 
+    public Search(){ }
+
 
     public Search(String search) {
         this.search = search;

@@ -14,18 +14,19 @@ public class ItemServiceMapImp implements ItemService{
     }
 
     @Override
-    public void addItem(String search, Item item) {
-        if (itemHashMap.containsKey(search)){
-            Collection<Item> col = itemHashMap.get(search);
+    public void addItem(String search, Item item) throws ItemException {
+        try {
+            Collection<Item> col = getCollection(search);
             col.add(item);
             itemHashMap.put(search, col);
+        } catch (ItemException e){
+            System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
         }
-        else
-            System.err.println("Invalid query parameter.");
     }
 
     @Override
-    public LinkedList<String> getItemsTitle(String search) {
+    public LinkedList<String> getItemsTitle(String search) throws ItemException {
         LinkedList<String> list = new LinkedList<>();
         try {
             Collection<Item> col = getCollection(search);
@@ -34,60 +35,63 @@ public class ItemServiceMapImp implements ItemService{
             }
         } catch (ItemException e) {
             System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
         }
         return list;
     }
 
     @Override
-    public Collection<Item> searchItems(String search) {
+    public Collection<Item> searchItems(String search) throws ItemException, IOException {
         Collection<Item> col = null;
         try {
-            if (! itemHashMap.containsKey(search)){
-                Search searchI = new Search(search);
-                col =  searchI.searchItem(search);
+            if (!itemHashMap.containsKey(search)) {
+                Search searchI = new Search();
+                col = searchI.searchItem(search);
                 itemHashMap.put(search, col);
-            } else {
-                System.err.println("Invalid query parameter.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            } else
+                col = itemHashMap.get(search);
+        } catch (IOException e){
+            System.out.println("Invalid input. Exception: " + e);
+            throw e;
         }
         return col;
     }
 
     @Override
-    public Collection<Item> getItems(String search) {
-        Collection<Item> col = null;
-        Collection<Item> colFinal = null;
-        if (!itemHashMap.containsKey(search)){
-            System.err.println("Invalid query parameter or search do no exits.");
-            throw new NullPointerException("Empty Items collection. First generate a serch");
-        }
-        else
-            col = itemHashMap.get(search);
+    public Collection<Item> getItems(String search) throws ItemException{
+        Collection<Item> colFinal;
+        try {
+            Collection<Item> col = getCollection(search);
             colFinal = col.stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        } catch (ItemException e){
+            System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
+        }
         return colFinal;
     }
 
     @Override
-    public Item getItem(String search, String id) {
+    public Item getItem(String search, String id) throws ItemException{
         Item item = null;
-        if (itemHashMap.containsKey(search)){
-            Collection<Item> col = itemHashMap.get(search);
+        try {
+            Collection<Item> col = getCollection(search);
             for (Item i : col) {
                 if(i.getId().equals(id))
-                    return item=i;
+                    item=i;
             }
-        } else
-            System.err.println("Invalid query parameter.");
+        } catch (ItemException e){
+            System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
+        }
         return item;
     }
 
     @Override
-    public Item editItem(String search, String id, Item item) {
+    public Item editItem(String search, String id, Item item) throws ItemException{
         Item value = null;
-        if (itemHashMap.containsKey(search)) {
-            Collection<Item> col = itemHashMap.get(search);
+
+        try {
+            Collection<Item> col = getCollection(search);
             for (Item i: col) {
                 if (i.getId().equals(id)){
                     i = item;
@@ -96,13 +100,15 @@ public class ItemServiceMapImp implements ItemService{
                 }
             }
             itemHashMap.put(search, col);
-        } else
-            System.err.println("Invalid query parameter.");
+        } catch (ItemException e){
+            System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
+        }
         return value;
     }
 
     @Override
-    public void deleteItem(String search, String id) {
+    public void deleteItem(String search, String id) throws ItemException{
         try {
             Collection<Item> col = getCollection(search);
             for (Item i: col) {
@@ -111,13 +117,14 @@ public class ItemServiceMapImp implements ItemService{
                 }
             }
             itemHashMap.put(search, col);
-        }  catch (ItemException e) {
+        } catch (ItemException e) {
             System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
         }
     }
 
     @Override
-    public Collection<Item> getItemsPriceRange(String search, int maxPrice, int minPrice) {
+    public Collection<Item> getItemsPriceRange(String search, int maxPrice, int minPrice) throws ItemException {
         Collection<Item> colFinal = new ArrayList<>();
         try{
             Collection<Item> col = getCollection(search);
@@ -128,12 +135,13 @@ public class ItemServiceMapImp implements ItemService{
 
         } catch (ItemException e) {
             System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
         }
         return colFinal;
     }
 
     @Override
-    public Collection<Item> getItemsTag(String search, String tag) {
+    public Collection<Item> getItemsTag(String search, String tag) throws ItemException {
         Collection<Item> colFinal = new ArrayList<>();
 
         try {
@@ -144,6 +152,7 @@ public class ItemServiceMapImp implements ItemService{
             }
         } catch (ItemException e) {
             System.out.println("Invalid collection. Exception:  " + e);
+            throw e;
         }
         return colFinal;
     }
